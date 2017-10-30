@@ -1,0 +1,13 @@
+.PHONY: all
+all: main
+
+# TODO: all DEPS are dependecies to object files (NOT TRUE!)
+%.o: %.cpp $(DEPS)
+	$(CXX) $(CFLAGS) -o $@ $<
+
+main: $(OBJ)
+	$(CXX) $(LFLAGS) $(LIBS) -o $@ $^
+
+.PHONY: clean
+clean::
+	\rm -f *.o main

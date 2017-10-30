@@ -1,0 +1,25 @@
+ifeq ($(MAKEFILE_DIR),)
+MAKEFILE_DIR := 1
+
+# build all subdirectories (default)
+ifeq ($(SUBDIRS),)
+SUBDIRS = $(shell find . ! -path . -type d)
+endif
+
+CLEANDIRS = $(SUBDIRS:%=clean-%)
+BUILDIRS = $(SUBDIRS:%=build-%)
+
+.PHONY: all
+all: subdirs
+
+.PHONY: subdirs $(BUILDIRS)
+subdirs: $(BUILDIRS)
+$(BUILDIRS): build-% : %
+	$(MAKE) -C $<
+
+.PHONY: clean $(CLEANDIRS)
+clean: $(CLEANDIRS)
+$(CLEANDIRS): clean-% : %
+	$(MAKE) -C $< clean
+
+endif
