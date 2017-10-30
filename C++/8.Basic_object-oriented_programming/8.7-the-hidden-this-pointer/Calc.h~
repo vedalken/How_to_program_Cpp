@@ -1,0 +1,17 @@
+#ifndef CALC_H
+#define CALC_H
+class Calc
+{
+private:
+	int m_value;
+public:
+	Calc() { m_value = 0; }
+
+	void Add(int value) { m_value += value; }
+	void Sub(int value) { m_value -= value; }
+	void Mult(int value) { m_value *= value; }
+
+	int GetValue() { return m_value; }
+};
+
+#endif

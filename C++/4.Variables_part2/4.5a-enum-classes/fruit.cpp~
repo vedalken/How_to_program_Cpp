@@ -1,0 +1,27 @@
+#include <iostream>
+
+int main()
+{
+	enum class Color {
+		RED,
+		BLUE
+	};
+
+	enum class Fruit {
+		BANNANA,
+		APPLE
+	};
+
+	Color color = Color::RED;
+	Fruit fruit = Fruit::BANNANA;
+
+	if (color == Color::RED)
+		std::cout << "color is RED\n";
+	else if (color == Color::BLUE)
+		std::cout << "color is BLUE\n";
+	
+	enum class Vehicle : char { RED, BLUE };
+	enum class People : unsigned { YELLOE, BLUE };
+	
+	return 0;
+}

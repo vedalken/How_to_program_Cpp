@@ -1,0 +1,20 @@
+#include <iostream>
+#include "Simple.h"
+#include "Calc.h"
+
+int main()
+{
+	Simple simple(1);
+	Something someting(1);
+	simple.SetID(2);
+	std::cout << simple.GetID() << std::endl;
+	std::cout << someting.GetData() << std::endl;
+	someting.GetAddress();
+	
+	Calc calc;
+	calc.Add(5);
+	calc.Sub(2);
+	calc.Mult(5);
+	std::cout << calc.GetValue() << std::endl;
+	return 0;
+}
