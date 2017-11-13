@@ -1,5 +1,5 @@
 INCDIR = .
-CXX = gcc
+CXX = ccache gcc
 FLAGS = -Wall -Wextra -Wpedantic -std=c++1z
 DFLAGS = -O3
 CFLAGS = -x c++ -c $(FLAGS) $(DFLAGS) -I$(INCDIR)
