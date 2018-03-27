@@ -10,6 +10,7 @@ SUBDIRS = \
 	15.Standard_Library_Containers_and_Iterators \
 	16.Standard_Library_Algorithms \
 	17.Exception_Handling_A_Deeper_Look \
+	18.Introduction_to_Custom_Templates \
 	23.Other_topics
 
 include $(SRC_TOP)/rules/Makefile.dir
