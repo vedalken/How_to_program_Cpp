@@ -1,0 +1,752 @@
+/*
+ * Implementation forward list structure.
+ */
+
+#ifndef LIST_H
+#define LIST_H
+
+#include <iostream>
+#include <initializer_list>
+#include <functional>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+
+#include "list_node.h"
+
+
+template <typename NODETYPE>
+class List
+{
+    using ListNodePtr = typename ListNode<NODETYPE>::ListNodePtr;
+    using Compare = std::function<bool(const NODETYPE& lhs,
+                                       const NODETYPE& rhs)>;
+
+    /*
+     * Friend function: operator<<
+     * Usage: List<int> tmpList{1, 2, 3};
+     *        std::cout << tmpList;
+     * ----------------------------------
+     * Method calls output stream operator `<<' to output list contents.
+     */
+
+    friend std::ostream& operator<<(std::ostream&         out,
+                                    const List<NODETYPE>& a_list)
+    {
+        std::copy(a_list.cbegin(), a_list.cend(),
+                  std::ostream_iterator<NODETYPE>(out, " "));
+        return out;
+    }
+
+public:
+
+    /*
+     * Class: iterator
+     * Usage: List<int>::iterator it;
+     * ------------------------------
+     * Helper class to access list nodes.
+     */
+
+    class iterator
+    {
+    public:
+        // iterator traits
+        using value_type = NODETYPE;
+        using difference_type = ptrdiff_t;
+        using pointer = NODETYPE*;
+        using reference = NODETYPE&;
+        using iterator_category = std::forward_iterator_tag;
+
+        // default constructor
+        iterator()
+            : m_listNode(nullptr)
+        {
+        }
+
+        // copy constructor
+        explicit iterator(const iterator& a_iterator)
+            : m_listNode(a_iterator.m_listNode)
+        {
+        }
+
+        // copy constructor
+        explicit iterator(ListNodePtr a_listNode)
+            : m_listNode(a_listNode)
+        {
+        }
+
+        // move constructor
+        iterator(iterator&& a_iterator)
+        {
+            m_listNode = std::move(a_iterator.m_listNode);
+        }
+
+        // copy assignment
+        iterator& operator=(const iterator& a_iterator)
+        {
+            if (this != &a_iterator) {
+                m_listNode = a_iterator.m_listNode;
+            }
+
+            return *this;
+        }
+
+        // move assigment
+        iterator& operator=(iterator&& a_iterator)
+        {
+            if (this != &a_iterator) {
+                m_listNode = std::move(a_iterator.m_listNode);
+            }
+
+            return *this;
+        }
+
+        // dereference
+        reference operator*() const
+        {
+           return m_listNode->m_data;
+        }
+
+        // preincrement
+        iterator& operator++()
+        {
+            m_listNode = m_listNode->nextNode();
+            return *this;
+        }
+
+        // postincrement
+        iterator operator++(int)
+        {
+            iterator iter(*this);
+            operator++();
+            return iter;
+        }
+
+        bool operator!=(const iterator& a_iterator)
+        {
+            return (m_listNode != a_iterator.m_listNode);
+        }
+
+        bool operator==(const iterator& a_iterator)
+        {
+            return !(operator!=(a_iterator));
+        }
+
+    private:
+        ListNodePtr m_listNode;
+    }; // end iterator
+
+    /*
+     * Class: const_iterator
+     * Usage: List<int>::const_iterator cit;
+     * -------------------------------------
+     * Helper class to access list nodes and iterate over list.
+     */
+
+    class const_iterator
+    {
+    public:
+        // iterator traits
+        using value_type = NODETYPE;
+        using difference_type = ptrdiff_t;
+        using pointer = const NODETYPE*;
+        using reference = const NODETYPE&;
+        using iterator_category = std::forward_iterator_tag;
+
+        // default constructor
+        const_iterator()
+            : m_listNode(nullptr)
+        {
+        }
+
+        // copy constructor
+        const_iterator(const const_iterator& a_iterator)
+            : m_listNode(a_iterator.m_listNode)
+        {
+        }
+
+        // copy constructor
+        explicit const_iterator(ListNodePtr a_listNode)
+            : m_listNode(a_listNode)
+        {
+        }
+
+        // move constructor
+        const_iterator(const_iterator&& a_iterator)
+        {
+            m_listNode = std::move(a_iterator.m_listNode);
+        }
+
+        // copy assignment
+        const_iterator& operator=(const const_iterator& a_iterator)
+        {
+            if (this != &a_iterator) {
+                m_listNode = a_iterator.m_listNode;
+            }
+
+            return *this;
+        }
+
+        // move assigment
+        const_iterator& operator=(const_iterator&& a_iterator)
+        {
+            if (this != &a_iterator) {
+                m_listNode = std::move(a_iterator.m_listNode);
+            }
+
+            return *this;
+        }
+
+        // dereference
+        reference operator*() const
+        {
+           return m_listNode->m_data;
+        }
+
+        // preincrement
+        const_iterator& operator++()
+        {
+            m_listNode = m_listNode->nextNode();
+            return *this;
+        }
+
+        // postincrement
+        const_iterator operator++(int)
+        {
+            const_iterator iter(*this);
+            operator++();
+            return iter;
+        }
+
+        bool operator!=(const const_iterator& a_iterator)
+        {
+            return (m_listNode != a_iterator.m_listNode);
+        }
+
+        bool operator==(const const_iterator& a_iterator)
+        {
+            return !(operator!=(a_iterator));
+        }
+
+    private:
+        ListNodePtr m_listNode;
+    }; // end iterator
+
+    /*-------------------------------------------------------------------------*/
+    /*
+     * Constructor: List()
+     * Usage: List<int> tmpList;
+     * -------------------------
+     * Default list constructor.
+     */
+
+    List()
+        : m_firstNode(nullptr), m_lastNode(nullptr)
+    {
+    }
+
+    /*
+     * Constructor: List
+     * Usage: List<int> tmpList{1, 2, 3};
+     * ----------------------------------
+     * Constructor list initialization using initializer_list.
+     */
+
+    List(std::initializer_list<NODETYPE> a_data)
+        : m_firstNode(nullptr),
+          m_lastNode(nullptr)
+    {
+        for (const auto& data : a_data) {
+            insertBack(data);
+        }
+    }
+
+    /*
+     * Copy constructor: List
+     * Usage: List<int> tmpList;
+     *        List<int> tmpList1(tmpList);
+     * -----------------------------------
+     * Prevent using copy constructor (poor peformance).
+     */ 
+
+    List(const List<NODETYPE>& a_list) = delete;
+
+    /*
+     * Move constructor: List
+     * Usage: List<int> tmpList;
+     *        List<int> tmpList1( std::move(tmpList) );
+     * -----------------------------------
+     * Move list constructor.
+     */ 
+
+    List(List<NODETYPE>&& a_list)
+    {
+        m_firstNode = std::move(a_list.m_firstNode);
+        m_lastNode = std::move(a_list.m_lastNode);
+        a_list.m_firstNode.reset();
+        a_list.m_lastNode.reset();
+    }
+
+    /*
+     * Destructor: List
+     * Usage: {
+     *            List<int> tmpList;
+     *        };
+     * -----------------------------
+     * Class destructor is not neccessary to free memory.
+     */
+
+    ~List()
+    {
+        if (isEmpty()) {
+            return;
+        }
+        
+        ListNodePtr currentNode(m_firstNode);
+        
+        while (m_firstNode) {
+            currentNode = m_firstNode;
+            m_firstNode = currentNode->m_nextNode;
+            currentNode.reset();
+        }
+    }
+
+    /* Copy assignment operator: List
+     * Usage: List<int> tmpList{ 1,2,3,4,5,6,7,8,9};
+     *        List<int> list = tmpList;
+     * --------------------------------------------
+     * Prevent copy list assignment operator (poor performance).
+     */
+
+    List<NODETYPE>& operator=(const List<NODETYPE>& a_list) = delete;
+
+    /* Move assignment operator: List
+     * Usage: List<int> l1{ 1, 2, 3 };
+     *        List<int> l = std::move(l1);
+     * ------------------------------------------
+     * Class move assignment operator.
+     */
+
+    List<NODETYPE>& operator=(List<NODETYPE>&& a_list)
+    {
+        if (this != &a_list)
+        {
+            m_firstNode = std::move(a_list.m_firstNode);
+            m_lastNode = std::move(a_list.m_lastNode);
+            a_list.m_firstNode.reset();
+            a_list.m_lastNode.reset();
+        }
+
+        return *this;
+    }
+
+    ListNodePtr firstNode()
+    {
+        return m_firstNode;
+    }
+
+    ListNodePtr firstNextNode()
+    {
+        return m_firstNode->m_nextNode;
+    }
+
+    ListNodePtr lastNode()
+    {
+        return m_lastNode;
+    }
+
+    ListNodePtr lastNextNode()
+    {
+        return m_lastNode->m_nextNode;
+    }
+
+    void firstNode(ListNodePtr a_firstNode)
+    {
+        m_firstNode = a_firstNode;
+    }
+
+    void firstNextNode(ListNodePtr a_nextNode)
+    {
+        m_firstNode->m_nextNode = a_nextNode;
+    }
+
+    void lastNode(ListNodePtr a_lastNode)
+    {
+        m_lastNode = a_lastNode;
+    }
+
+    void lastNextNode(ListNodePtr a_nextNode)
+    {
+        m_lastNode->m_nextNode = a_nextNode;
+    }
+
+    /*
+     * Function: begin
+     * Usage: List<int> tmpList;
+     *        List<int>::iterator it = tmpList.begin();
+     * ------------------------------------------------
+     * Method return iterator to first node in a list.
+     */
+
+    iterator begin()
+    {
+        return iterator(m_firstNode);
+    }
+
+    /*
+     * Function: cbegin
+     * Usage: List<int> tmpList;
+     *        List<int>::const_iterator it = tmpList.cbegin();
+     * -------------------------------------------------------
+     * Method return constant iterator to first node in a list.
+     * Only read accessed is allowed to a list.
+     */
+
+    const_iterator cbegin() const
+    {
+        return const_iterator(m_firstNode);
+    }
+
+    /*
+     * Function: end
+     * Usage: List<int> tmpList;
+     *        List<int>::iterator it = tmpList.end();
+     * ------------------------------------------------
+     * Method return iterator to one list node past the last list node.
+     * This node is always null.
+     */
+
+    iterator end()
+    {
+        return iterator(nullptr);
+    }
+
+    /*
+     * Function: cend
+     * Usage: List<int> tmpList;
+     *        List<int>::const_iterator it = tmpList.cend();
+     * -----------------------------------------------------
+     * Method return constant iterator to one list node past the last list node.
+     * Only read accessed is allowed to a list.
+     */
+
+    const_iterator cend() const
+    {
+        return const_iterator(nullptr);
+    }
+
+    /*
+     * Function: isEmpty
+     * Usage: List<int> tmpList;
+     *        tmpList.isEmpty();
+     * -----------------------------
+     * Method determine the list is not empty. List is empty if
+     * first node is empty.
+     */
+
+    bool isEmpty() const
+    {
+        return m_firstNode == nullptr;
+    }
+
+    /*
+     * Function: insertFront
+     * Usage: List<int> tmpList;
+     *        tmpList.insertFront(5);
+     * -----------------------------
+     * Method insert new node with node data to the first place in list.
+     */
+
+    void insertFront(const NODETYPE& a_data)
+    {
+        // create new node
+        ListNodePtr newNode = getNewNode(a_data);
+
+        if (isEmpty()) {
+            // First node is also the last node
+            m_firstNode = m_lastNode = newNode;
+        }
+        else {
+            // old first node place on new second place
+            newNode->m_nextNode = m_firstNode;
+
+            // new node is in new first place
+            m_firstNode = newNode;
+        }
+    }
+
+    /*
+     * Function: insert
+     * Usage: List<int> tmpList;
+     *        tmpList.insert(5, [](const int& a_l, const int& a_r) {
+     *                          return a_l < a_r;
+     *                       });
+     *        tmpList.insert(-10);
+     * -------------------------------------------------------------
+     * Method inserts new node based on binary function object. By
+     * default, node values are inserted in ascending order.
+     *
+     */
+
+    void insert(const NODETYPE& a_data,
+                Compare a_binary_op = std::less<NODETYPE>())
+    {
+        if (isEmpty()) {
+            ListNodePtr newNode = getNewNode(a_data);
+            m_firstNode = m_lastNode = newNode;
+            return;
+        }
+
+	/* Insert node in first position. */
+	if (a_binary_op(a_data, m_firstNode->getData())) {
+	    insertFront(a_data);
+	    return;
+	}
+
+        ListNodePtr currentNewNode(m_firstNode);
+        ListNodePtr nextNode(m_firstNode->m_nextNode);
+
+        /* Find appropriate position to insert new node after first node. */
+        while ( (nextNode != nullptr) &&
+	        !a_binary_op(a_data, nextNode->getData()) ) {
+            currentNewNode = nextNode;
+            nextNode = currentNewNode->m_nextNode;
+        }
+
+        /* Insert data in front as temporary (or latter final) first node. */
+        if ( (currentNewNode == m_firstNode) && 
+	      a_binary_op(a_data, currentNewNode->getData()) ) {
+            insertFront(a_data);
+            return;
+        }
+
+        /* Insert data at back as temporary (or latter final) last node. */
+        if (nextNode == nullptr) {
+            insertBack(a_data);
+            return;
+        }
+
+        /* Insert data after first and before last node. */
+        ListNodePtr newNode = getNewNode(a_data);
+        currentNewNode->m_nextNode = newNode;
+        newNode->m_nextNode = nextNode;
+    }
+
+    /*
+     * Function: insertBack
+     * Usage: List<int> tmpList;
+     *        tmpList.insertBack(5);
+     * -----------------------------
+     * Method insert new node with node data to the last place in list.
+     */
+
+    void insertBack(const NODETYPE& a_data)
+    {
+        ListNodePtr newNode = getNewNode(a_data);
+
+        if (isEmpty()) {
+            m_firstNode = m_lastNode = newNode;
+        }
+        else {
+            // update previous last node to point to new last node
+            m_lastNode->m_nextNode = newNode;
+
+            // new last node
+            m_lastNode = newNode;
+        }
+    }
+
+    /*
+     * Function: removeFront
+     * Usage: int a; tmpList.removeFront(&a);
+     * -------------------------------------
+     * Method removes first node and its data is stored in function argument.
+     */
+
+    bool removeFront(NODETYPE* a_data)
+    {
+        if (isEmpty()) {
+            // nothing to do
+            return false;
+        }
+
+        ListNodePtr oldFirstNode = m_firstNode;
+
+        if (m_firstNode == m_lastNode) {
+            m_firstNode.reset();
+            m_lastNode.reset();
+        }
+        else {
+            m_firstNode = m_firstNode->m_nextNode;
+        }
+
+        // copy remove node data
+        *a_data = oldFirstNode->m_data;
+
+        // remove old first node
+        oldFirstNode.reset();
+
+        return true;
+    }
+
+    /*
+     * Function: removeBack
+     * Usage: int a; tmpList.removeBack(&a);
+     * -------------------------------------
+     * Method searches last node starting from the first node. Last node is
+     * removed and its data is stored in function argument.
+     * NOTE: bad performance: remove last node (O(N)),
+     *       remove first node (O(1)), on average (O(N) + const.)
+     */
+
+    bool removeBack(NODETYPE* a_data)
+    {
+        if (isEmpty()) {
+            // nothing to do
+            return false;
+        }
+
+        ListNodePtr oldLastNode = m_lastNode;
+
+        if (m_firstNode == m_lastNode) {
+            m_firstNode.reset();
+            m_lastNode.reset();
+        }
+        else {
+            // find last node
+            ListNodePtr tmpNode = m_firstNode;
+
+            // find node before last node
+            while (tmpNode->m_nextNode != m_lastNode) {
+                tmpNode = tmpNode->m_nextNode;
+            }
+
+            // before last node is new last node
+            m_lastNode = tmpNode;
+            m_lastNode->m_nextNode.reset();
+        }
+
+        // store old node data
+        *a_data = oldLastNode->m_data;
+
+        // release memory for removed node
+        oldLastNode.reset();
+
+        return true;
+    }
+
+    /*
+     * Function: merge
+     * Usage: list1.merge(list2);
+     * --------------------------
+     * Merge algorithm merge target list into current list. Each target node is
+     * sequentially moved to current list. Moving process preserve original list,
+     * target list nodes ownership is transfered to new owner current list.
+     */
+
+    void merge(List<NODETYPE>& a_list, Compare a_comp = std::less<NODETYPE>())
+    {
+        if (this == &a_list) {
+            // trivial merge
+            return;
+        }
+
+        if (a_list.isEmpty()) {
+            // trivial merge
+            return;
+        }
+
+        if (isEmpty())
+        {
+            m_firstNode = std::move(a_list.m_firstNode);
+            m_lastNode = std::move(a_list.m_lastNode);
+            a_list.m_firstNode.reset();
+            a_list.m_lastNode.reset();
+            return;
+        }
+
+        ListNodePtr currentNode = m_firstNode;
+        ListNodePtr currentNextNode = m_firstNode->m_nextNode;
+        ListNodePtr prevNode = currentNode;
+        ListNodePtr mergeNode(nullptr);
+
+        while (!a_list.isEmpty())
+        {
+            mergeNode = a_list.m_firstNode;
+
+            // Find node position to be merged into
+            while ( (currentNextNode != nullptr) &&
+                a_comp(currentNextNode->getData(), mergeNode->getData()) )
+            {
+                currentNode = currentNextNode;
+                currentNextNode = currentNode->m_nextNode;
+            }
+
+            // Merge node
+            prevNode = currentNode;
+            currentNode = a_list.moveFirstNode();
+            prevNode->setNextNode(currentNode);
+            currentNode->setNextNode(currentNextNode);
+        }
+    }
+
+    /*
+     * Function: print
+     * Usage: tmpList.print();
+     * -----------------------
+     * Method displays all list nodes. Please use
+     * overloaded operator `<<' instead.
+     */
+
+    void print() const
+    {
+        if (isEmpty()) {
+            return;
+        }
+
+        ListNodePtr currentNode(m_firstNode);
+
+        while (currentNode) {
+            std::cout << currentNode->m_data << ' ';
+            currentNode = currentNode->m_nextNode;
+        }
+
+        std::cout << std::endl;
+    }
+
+private:
+    ListNodePtr m_firstNode;
+    ListNodePtr m_lastNode;
+
+    /*
+     * Function: getNewNode
+     * Usage: ListNode<int>::ListNodePtr node = getNewNode(42);
+     * -------------------------------------------
+     * Method create new list node with node data. Method calls STD
+     * new allocator to allocate memory on heap.
+     */
+
+    ListNodePtr getNewNode(const NODETYPE& a_data)
+    {
+        return std::make_shared<ListNode<NODETYPE>>(a_data);
+    }
+
+    /*
+     * Function: moveFirstNode()
+     * Usage: ListNode<int> a = moveFirstNode();
+     * -----------------------------------------
+     * Method moves first node. Next new node is next node in moved first node.
+     */
+
+    ListNodePtr moveFirstNode()
+    {
+        ListNodePtr nextFirstNode = m_firstNode->m_nextNode;
+        ListNodePtr firstNode = std::move(m_firstNode);
+        m_firstNode = nextFirstNode;
+        return firstNode;
+    }
+
+};// end class List
+
+
+#endif
