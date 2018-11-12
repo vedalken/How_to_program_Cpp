@@ -334,7 +334,17 @@ public:
 	return m_firstNode;
     }    
 
+    ListNode<NODETYPE>* firstNode() const
+    {
+	return m_firstNode;
+    }    
+
     ListNode<NODETYPE>* firstNextNode()
+    {
+	return m_firstNode->m_nextNode;
+    }
+
+    ListNode<NODETYPE>* firstNextNode() const
     {
 	return m_firstNode->m_nextNode;
     }
@@ -343,8 +353,18 @@ public:
     {
 	return m_lastNode;
     }
+
+    ListNode<NODETYPE>* lastNode() const
+    {
+	return m_lastNode;
+    }
  
     ListNode<NODETYPE>* lastNextNode()
+    {
+	return m_lastNode->m_nextNode;
+    }
+ 
+    ListNode<NODETYPE>* lastNextNode() const
     {
 	return m_lastNode->m_nextNode;
     }

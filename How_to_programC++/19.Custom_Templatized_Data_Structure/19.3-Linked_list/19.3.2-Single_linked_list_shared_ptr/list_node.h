@@ -21,7 +21,7 @@ public:
     }
 
     // Move constructor
-    explicit ListNode(ListNode<NODETYPE>&& a_listNode)
+    ListNode(ListNode<NODETYPE>&& a_listNode)
     {
 	m_data = std::move(a_listNode.m_data);
 	m_nextNode = std::move(a_listNode.m_nextNode);

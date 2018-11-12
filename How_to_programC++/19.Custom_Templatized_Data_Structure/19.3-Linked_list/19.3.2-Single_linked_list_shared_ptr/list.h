@@ -15,10 +15,17 @@
 #include "list_node.h"
 
 
+template <typename NODETYPE> class List;
+
+template <typename NODETYPE>
+std::ostream& operator<<(std::ostream&, const List<NODETYPE>&);
+
+
 template <typename NODETYPE>
 class List
 {
     using ListNodePtr = typename ListNode<NODETYPE>::ListNodePtr;
+    using ListNodeWeakPtr = std::weak_ptr<ListNode<NODETYPE>>;
     using Compare = std::function<bool(const NODETYPE& lhs,
                                        const NODETYPE& rhs)>;
 
@@ -30,13 +37,8 @@ class List
      * Method calls output stream operator `<<' to output list contents.
      */
 
-    friend std::ostream& operator<<(std::ostream&         out,
-                                    const List<NODETYPE>& a_list)
-    {
-        std::copy(a_list.cbegin(), a_list.cend(),
-                  std::ostream_iterator<NODETYPE>(out, " "));
-        return out;
-    }
+    friend std::ostream& operator<< <NODETYPE>(std::ostream&         out,
+                                               const List<NODETYPE>& a_list);
 
 public:
 
@@ -241,7 +243,8 @@ public:
      */
 
     List()
-        : m_firstNode(nullptr), m_lastNode(nullptr)
+        : m_firstNode(nullptr),
+          m_lastNode(nullptr)
     {
     }
 
@@ -262,14 +265,46 @@ public:
     }
 
     /*
+     * Fill constructor: List
+     * Usage List<int> tmpList(5);
+     * ---------------------------
+     * Fill constructor fill data with default constructor.
+     */
+
+    explicit List(size_t a_size)
+        : m_firstNode(nullptr),
+          m_lastNode(nullptr)
+    {
+        const NODETYPE node{};
+        for (size_t i = 0; i < a_size; ++i) {
+            insertBack(node);
+        }
+    }
+
+    /*
      * Copy constructor: List
      * Usage: List<int> tmpList;
      *        List<int> tmpList1(tmpList);
      * -----------------------------------
-     * Prevent using copy constructor (poor peformance).
+     * Copy constructor (poor peformance!).
      */ 
 
-    List(const List<NODETYPE>& a_list) = delete;
+    List(const List<NODETYPE>& a_list)
+        : m_firstNode(nullptr),
+          m_lastNode(nullptr)
+    {
+        if (a_list.isEmpty()) {
+            // nothing to do
+            return;
+        }
+
+        ListNodeWeakPtr currentNode(a_list.m_firstNode);
+
+        while (!currentNode.expired()) {
+            insertBack(currentNode.lock()->getData());
+            currentNode = currentNode.lock()->nextNode();
+        }
+    }
 
     /*
      * Move constructor: List
@@ -301,9 +336,9 @@ public:
         if (isEmpty()) {
             return;
         }
-        
+
         ListNodePtr currentNode(m_firstNode);
-        
+
         while (m_firstNode) {
             currentNode = m_firstNode;
             m_firstNode = currentNode->m_nextNode;
@@ -315,10 +350,31 @@ public:
      * Usage: List<int> tmpList{ 1,2,3,4,5,6,7,8,9};
      *        List<int> list = tmpList;
      * --------------------------------------------
-     * Prevent copy list assignment operator (poor performance).
+     * Copy list assignment operator (poor performance).
      */
 
-    List<NODETYPE>& operator=(const List<NODETYPE>& a_list) = delete;
+    List<NODETYPE>& operator=(const List<NODETYPE>& a_list)
+    {
+        if (this == &a_list) {
+            // nothing to do
+            return *this;
+        }
+
+        ListNodePtr currentNode(m_firstNode);
+        while (m_firstNode) {
+            currentNode = m_firstNode;
+            m_firstNode = currentNode->m_nextNode;
+            currentNode.reset();
+        }
+
+        ListNodeWeakPtr node(a_list.m_firstNode);
+        while (!node.expired()) {
+            insertBack(node.lock()->getData());
+            node = node.lock()->nextNode();
+        }
+
+        return *this;
+    }
 
     /* Move assignment operator: List
      * Usage: List<int> l1{ 1, 2, 3 };
@@ -446,7 +502,7 @@ public:
 
     bool isEmpty() const
     {
-        return m_firstNode == nullptr;
+        return !m_firstNode;
     }
 
     /*
@@ -497,39 +553,31 @@ public:
             return;
         }
 
-	/* Insert node in first position. */
-	if (a_binary_op(a_data, m_firstNode->getData())) {
-	    insertFront(a_data);
-	    return;
-	}
-
-        ListNodePtr currentNewNode(m_firstNode);
-        ListNodePtr nextNode(m_firstNode->m_nextNode);
-
-        /* Find appropriate position to insert new node after first node. */
-        while ( (nextNode != nullptr) &&
-	        !a_binary_op(a_data, nextNode->getData()) ) {
-            currentNewNode = nextNode;
-            nextNode = currentNewNode->m_nextNode;
-        }
-
-        /* Insert data in front as temporary (or latter final) first node. */
-        if ( (currentNewNode == m_firstNode) && 
-	      a_binary_op(a_data, currentNewNode->getData()) ) {
+        /* Insert node in first position. */
+        if (a_binary_op(a_data, m_firstNode->getData())) {
             insertFront(a_data);
             return;
         }
 
+        ListNodeWeakPtr currentNewNode(m_firstNode);
+        ListNodeWeakPtr nextNode(m_firstNode->m_nextNode);
+
+        /* Find appropriate position to insert new node after first node. */
+        while ( !nextNode.expired() && !a_binary_op(a_data, nextNode.lock()->getData()) ) {
+            currentNewNode = nextNode;
+            nextNode = currentNewNode.lock()->m_nextNode;
+        }
+
         /* Insert data at back as temporary (or latter final) last node. */
-        if (nextNode == nullptr) {
+        if (!nextNode.expired()) {
             insertBack(a_data);
             return;
         }
 
         /* Insert data after first and before last node. */
         ListNodePtr newNode = getNewNode(a_data);
-        currentNewNode->m_nextNode = newNode;
-        newNode->m_nextNode = nextNode;
+        currentNewNode.lock()->m_nextNode = newNode;
+        newNode->m_nextNode = nextNode.lock();
     }
 
     /*
@@ -570,7 +618,7 @@ public:
             return false;
         }
 
-        ListNodePtr oldFirstNode = m_firstNode;
+        ListNodePtr oldFirstNode(m_firstNode);
 
         if (m_firstNode == m_lastNode) {
             m_firstNode.reset();
@@ -614,15 +662,15 @@ public:
         }
         else {
             // find last node
-            ListNodePtr tmpNode = m_firstNode;
+            ListNodeWeakPtr tmpNode(m_firstNode);
 
             // find node before last node
-            while (tmpNode->m_nextNode != m_lastNode) {
-                tmpNode = tmpNode->m_nextNode;
+            while (tmpNode.lock()->m_nextNode != m_lastNode) {
+                tmpNode = tmpNode.lock()->m_nextNode;
             }
 
             // before last node is new last node
-            m_lastNode = tmpNode;
+            m_lastNode = tmpNode.lock();
             m_lastNode->m_nextNode.reset();
         }
 
@@ -665,28 +713,29 @@ public:
             return;
         }
 
-        ListNodePtr currentNode = m_firstNode;
-        ListNodePtr currentNextNode = m_firstNode->m_nextNode;
-        ListNodePtr prevNode = currentNode;
-        ListNodePtr mergeNode(nullptr);
+        ListNodeWeakPtr currentNode(m_firstNode);
+        ListNodeWeakPtr currentNextNode(m_firstNode->m_nextNode);
+        ListNodePtr prevNode;
+        ListNodePtr mergeNode;
 
         while (!a_list.isEmpty())
         {
             mergeNode = a_list.m_firstNode;
 
             // Find node position to be merged into
-            while ( (currentNextNode != nullptr) &&
-                a_comp(currentNextNode->getData(), mergeNode->getData()) )
+            while ( (!currentNextNode.expired()) &&
+                     a_comp(currentNextNode.lock()->getData(),
+                     mergeNode->getData()) )
             {
                 currentNode = currentNextNode;
                 currentNextNode = currentNode->m_nextNode;
             }
 
             // Merge node
-            prevNode = currentNode;
+            prevNode = currentNode.lock();
             currentNode = a_list.moveFirstNode();
-            prevNode->setNextNode(currentNode);
-            currentNode->setNextNode(currentNextNode);
+            prevNode->setNextNode(currentNode.lock());
+            currentNode.lock()->setNextNode(currentNextNode.lock());
         }
     }
 
@@ -704,14 +753,84 @@ public:
             return;
         }
 
-        ListNodePtr currentNode(m_firstNode);
+        ListNodeWeakPtr currentNode(m_firstNode);
 
-        while (currentNode) {
-            std::cout << currentNode->m_data << ' ';
-            currentNode = currentNode->m_nextNode;
+        while (!currentNode.expired()) {
+            std::cout << currentNode.lock()->m_data << ' ';
+            currentNode = currentNode.lock()->m_nextNode;
         }
 
         std::cout << std::endl;
+    }
+
+    /*
+     * Function: reverse
+     * Usage: tmpList.reverse();
+     * ------------------------
+     * Method reverse list order.
+     *
+     */
+
+    void reverse()
+    {
+        // one node
+        if (m_firstNode == m_lastNode) {
+            // nothing to do
+            return;
+        }
+
+        // two nodes
+        if (m_firstNode->m_nextNode == m_lastNode) {
+            m_firstNode.swap(m_lastNode);
+            m_firstNode->m_nextNode = m_lastNode;
+            m_lastNode->m_nextNode = nullptr;
+            return;
+        }
+
+        ListNodeWeakPtr frontNode(m_firstNode);
+        ListNodeWeakPtr backNode(m_lastNode);
+        ListNodeWeakPtr beforeFrontNode, beforeBackNode;
+
+        while (frontNode.lock() != backNode.lock() &&
+               frontNode.lock()->m_nextNode != backNode.lock() &&
+               beforeFrontNode.lock() != backNode.lock())
+        {
+            // swap front and back node and next nodes, respectively
+            std::swap(frontNode, backNode);
+            (frontNode.lock()->m_nextNode).swap(backNode.lock()->m_nextNode);
+
+            // update before back next node to point to back node
+            beforeBackNode = frontNode;
+            while ( !beforeBackNode.expired() &&
+                    (beforeBackNode.lock()->m_nextNode != frontNode.lock()) ) {
+                beforeBackNode = beforeBackNode.lock()->m_nextNode;
+            }
+
+            // dummy pointer prevents deleting temporary single pointer node 
+            // used in node manipulation
+            ListNodePtr dummyPtr(beforeBackNode.lock()->m_nextNode);
+            beforeBackNode.lock()->m_nextNode = backNode.lock();
+
+            // update before front next node
+            if ( !beforeFrontNode.expired() &&
+                 (beforeFrontNode.lock()->m_nextNode != frontNode.lock()) ) {
+                beforeFrontNode.lock()->m_nextNode = frontNode.lock();
+            }
+
+            // update before front node and front and back node
+            beforeFrontNode = frontNode;
+            frontNode = frontNode.lock()->m_nextNode;
+            backNode = beforeBackNode;
+        }
+
+        if (frontNode.lock()->m_nextNode == backNode.lock()) {
+            std::swap(frontNode, backNode);
+            (frontNode.lock()->m_nextNode).swap(backNode.lock()->m_nextNode);
+            (beforeFrontNode.lock()->m_nextNode).swap(frontNode.lock()->m_nextNode);
+        }
+
+        // update new first and last node
+        m_firstNode.swap(m_lastNode);
     }
 
 private:
@@ -721,7 +840,7 @@ private:
     /*
      * Function: getNewNode
      * Usage: ListNode<int>::ListNodePtr node = getNewNode(42);
-     * -------------------------------------------
+     * --------------------------------------------------------
      * Method create new list node with node data. Method calls STD
      * new allocator to allocate memory on heap.
      */
@@ -745,8 +864,24 @@ private:
         m_firstNode = nextFirstNode;
         return firstNode;
     }
-
 };// end class List
 
+template <typename NODETYPE>
+std::ostream& operator<<(std::ostream&         out,
+                         const List<NODETYPE>& a_list)
+{
+    std::copy(a_list.cbegin(), a_list.cend(),
+              std::ostream_iterator<NODETYPE>(out, " "));
+    return out;
+}
+
+template <>
+std::ostream& operator<<(std::ostream&     out,
+                         const List<char>& a_list)
+{
+    std::copy(a_list.cbegin(), a_list.cend(),
+              std::ostream_iterator<char>(out, ""));
+    return out;
+}
 
 #endif

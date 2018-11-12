@@ -7,27 +7,21 @@
 
 #include "list.h"
 
-// Concatenate a second list to a first list
+/* Concatenate a second list to a first list. */
 template <typename NODETYPE>
-void concatenate(List<NODETYPE>& a_firstList, List<NODETYPE>& a_secondList)
+void concatenate(List<NODETYPE>& a_firstList, const List<NODETYPE>& a_secondList)
 {
-    // first list is empty
-    if (a_firstList.isEmpty())
-    {
-        a_firstList.firstNode( a_secondList.firstNode() );
-        a_firstList.lastNode( a_secondList.lastNode() );
-        return;
-    }
-
-    // second list is empty
-    if (a_secondList.isEmpty())
-    {
+    if (a_secondList.isEmpty()) {
         // nothing to do
         return;
     }
-    
-    // connect last node with appended first node
-    a_firstList.lastNextNode( a_secondList.firstNode() );
+
+    // deep copy second list
+    const ListNode<NODETYPE>* currentNode = a_secondList.firstNode();
+    while (currentNode != nullptr) {
+	a_firstList.insertBack(currentNode->getData());
+	currentNode = currentNode->nextNode();
+    }
 }
 
 // Merge second list into first
