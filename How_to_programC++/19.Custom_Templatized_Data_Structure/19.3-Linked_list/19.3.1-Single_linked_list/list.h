@@ -35,6 +35,8 @@ class List
 
 public:
 
+    using ListNodePtr = ListNode<NODETYPE>*;
+
     /*
      * Class: iterator
      * Usage: List<int>::iterator it;
@@ -643,6 +645,75 @@ public:
     }
 
     /*
+     * Function: reverse
+     * Usage: tmpList.reverse();
+     * ------------------------
+     * Method reverse list order.
+     *
+     */
+
+    void reverse()
+    {
+        // one node
+        if (m_firstNode == m_lastNode) {
+            // nothing to do
+            return;
+        }
+
+        // two nodes
+        if (m_firstNode && m_firstNode->m_nextNode == m_lastNode) {
+            std::swap(m_firstNode, m_lastNode);
+            m_firstNode->m_nextNode = m_lastNode;
+            m_lastNode->m_nextNode = nullptr;
+            return;
+        }
+
+        ListNode<NODETYPE>* frontNode = m_firstNode;
+        ListNode<NODETYPE>* backNode = m_lastNode;
+        ListNode<NODETYPE>* beforeFrontNode = nullptr;
+        ListNode<NODETYPE>* beforeBackNode = nullptr;
+
+        while ((frontNode != backNode) && (frontNode->m_nextNode != backNode) &&
+               (beforeFrontNode != backNode))
+        {
+            // swap front and back node and next nodes, respectively
+            std::swap(frontNode, backNode);
+            std::swap(frontNode->m_nextNode, backNode->m_nextNode);
+
+            // update before back next node to point to back node
+            beforeBackNode = frontNode;
+            while ( (beforeBackNode != nullptr) &&
+                    (beforeBackNode->m_nextNode != frontNode) ) {
+                beforeBackNode = beforeBackNode->m_nextNode;
+            }
+
+            // dummy pointer prevents deleting temporary single pointer node 
+            // used in node manipulation
+            beforeBackNode->m_nextNode = backNode;
+
+            // update before front next node
+            if ( (beforeFrontNode != nullptr) &&
+                 (beforeFrontNode->m_nextNode != frontNode) ) {
+                beforeFrontNode->m_nextNode = frontNode;
+            }
+
+            // update before front node and front and back node
+            beforeFrontNode = frontNode;
+            frontNode = frontNode->m_nextNode;
+            backNode = beforeBackNode;
+        }
+
+        if ((frontNode != nullptr) && (frontNode->m_nextNode == backNode)) {
+            std::swap(frontNode, backNode);
+            std::swap(frontNode->m_nextNode, backNode->m_nextNode);
+            std::swap(beforeFrontNode->m_nextNode, frontNode->m_nextNode);
+        }
+
+        // update new first and last node
+        std::swap(m_firstNode, m_lastNode);
+    }
+
+    /*
      * Function: print
      * Usage: tmpList.print();
      * -----------------------
@@ -679,7 +750,7 @@ private:
 
     ListNode<NODETYPE>* getNewNode(const NODETYPE& a_data)
     {
-	return new ListNode<NODETYPE>(a_data);
+		return new ListNode<NODETYPE>(a_data);
     }
 
     /*
@@ -691,10 +762,10 @@ private:
 
     ListNode<NODETYPE>* moveFirstNode()
     {
-	ListNode<NODETYPE>* nextFirstNode = m_firstNode->m_nextNode;
-	ListNode<NODETYPE>* firstNode = std::move(m_firstNode);
-	m_firstNode = nextFirstNode;
-	return firstNode;
+		ListNode<NODETYPE>* nextFirstNode = m_firstNode->m_nextNode;
+		ListNode<NODETYPE>* firstNode = std::move(m_firstNode);
+		m_firstNode = nextFirstNode;
+		return firstNode;
     }
 
 };// end class List
