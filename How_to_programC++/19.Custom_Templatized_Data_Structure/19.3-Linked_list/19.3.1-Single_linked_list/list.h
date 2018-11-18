@@ -174,7 +174,7 @@ public:
         const_iterator(const_iterator&& a_iterator)
         {
             m_listNode = std::move(a_iterator.m_listNode);
-            //a_iterator.m_listNode = nullptr;
+            a_iterator.m_listNode = nullptr;
         }
 
         // copy assignment
@@ -192,7 +192,7 @@ public:
         {
             if (this != &a_iterator) {
                 m_listNode = std::move(a_iterator.m_listNode);
-                //a_iterator.m_listNode = nullptr;
+                a_iterator.m_listNode = nullptr;
             }
 
             return *this;
@@ -653,63 +653,28 @@ public:
 
     void reverse()
     {
-        // one node
         if (m_firstNode == m_lastNode) {
             // nothing to do
             return;
         }
 
-        // two nodes
-        if (m_firstNode && m_firstNode->m_nextNode == m_lastNode) {
-            std::swap(m_firstNode, m_lastNode);
-            m_firstNode->m_nextNode = m_lastNode;
-            m_lastNode->m_nextNode = nullptr;
-            return;
+        ListNodePtr prevNode = m_firstNode;
+        ListNodePtr headNode = prevNode->m_nextNode;
+        ListNodePtr curNode = headNode;
+
+        // set previous first node as the last node
+        prevNode->m_nextNode = nullptr;
+        m_lastNode = prevNode;
+
+        while (headNode != nullptr) {
+            headNode = headNode->m_nextNode;
+            curNode->m_nextNode = prevNode;
+            prevNode = curNode;
+            curNode = headNode;
         }
 
-        ListNode<NODETYPE>* frontNode = m_firstNode;
-        ListNode<NODETYPE>* backNode = m_lastNode;
-        ListNode<NODETYPE>* beforeFrontNode = nullptr;
-        ListNode<NODETYPE>* beforeBackNode = nullptr;
-
-        while ((frontNode != backNode) && (frontNode->m_nextNode != backNode) &&
-               (beforeFrontNode != backNode))
-        {
-            // swap front and back node and next nodes, respectively
-            std::swap(frontNode, backNode);
-            std::swap(frontNode->m_nextNode, backNode->m_nextNode);
-
-            // update before back next node to point to back node
-            beforeBackNode = frontNode;
-            while ( (beforeBackNode != nullptr) &&
-                    (beforeBackNode->m_nextNode != frontNode) ) {
-                beforeBackNode = beforeBackNode->m_nextNode;
-            }
-
-            // dummy pointer prevents deleting temporary single pointer node 
-            // used in node manipulation
-            beforeBackNode->m_nextNode = backNode;
-
-            // update before front next node
-            if ( (beforeFrontNode != nullptr) &&
-                 (beforeFrontNode->m_nextNode != frontNode) ) {
-                beforeFrontNode->m_nextNode = frontNode;
-            }
-
-            // update before front node and front and back node
-            beforeFrontNode = frontNode;
-            frontNode = frontNode->m_nextNode;
-            backNode = beforeBackNode;
-        }
-
-        if ((frontNode != nullptr) && (frontNode->m_nextNode == backNode)) {
-            std::swap(frontNode, backNode);
-            std::swap(frontNode->m_nextNode, backNode->m_nextNode);
-            std::swap(beforeFrontNode->m_nextNode, frontNode->m_nextNode);
-        }
-
-        // update new first and last node
-        std::swap(m_firstNode, m_lastNode);
+        // set previous last node as the first node
+        m_firstNode = prevNode;
     }
 
     /*
