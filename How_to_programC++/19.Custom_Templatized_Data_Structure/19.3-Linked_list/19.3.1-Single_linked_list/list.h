@@ -13,9 +13,17 @@
 #include "list_node.h"
 
 
+template <typename NODETYPE> class List;
+
+template <typename NODETYPE>
+std::ostream& operator<<(std::ostream&, const List<NODETYPE>&);
+
+
 template <typename NODETYPE>
 class List
 {
+    using Compare = std::function<bool(const NODETYPE& lhs, const NODETYPE& rhs)>;
+
     /*
      * Friend function: operator<<
      * Usage: List<int> tmpList{1, 2, 3};
@@ -23,15 +31,8 @@ class List
      * ----------------------------------
      * Method calls output stream operator `<<' to output list contents.
      */
-
-    friend std::ostream& operator<<(std::ostream& out, const List<NODETYPE>& a_list)
-    {
-        std::copy(a_list.cbegin(), a_list.cend(),
-                  std::ostream_iterator<NODETYPE>(out, " "));
-        return out;
-    }
-
-    typedef std::function<bool(const NODETYPE& lhs, const NODETYPE& rhs)> Compare;
+    friend std::ostream& operator<<<NODETYPE>(std::ostream&         out,
+                                              const List<NODETYPE>& a_list);
 
 public:
 
@@ -595,6 +596,7 @@ public:
      * Merge algorithm merge target list into current list. Each target node is
      * sequentially moved to current list. Moving process preserve original list,
      * target list nodes ownership is transfered to new owner current list.
+     * TODO: optimize for performance!
      */
 
     void merge(List<NODETYPE>& a_list, Compare a_comp = std::less<NODETYPE>())
@@ -647,7 +649,7 @@ public:
      * Function: reverse
      * Usage: tmpList.reverse();
      * ------------------------
-     * Method reverse list order.
+     * Method to reverse list order.
      *
      */
 
@@ -686,18 +688,18 @@ public:
 
     void print() const
     {
-    if (isEmpty()) {
-        return;
-    }
+        if (isEmpty()) {
+            return;
+        }
 
-    ListNodePtr currentNode = m_firstNode;
+        ListNodePtr currentNode = m_firstNode;
 
-    while (currentNode != nullptr) {
-        std::cout << currentNode->m_data << ' ';
-        currentNode = currentNode->m_nextNode;
-    }
+        while (currentNode != nullptr) {
+            std::cout << currentNode->m_data << ' ';
+            currentNode = currentNode->m_nextNode;
+        }
 
-    std::cout << std::endl;
+        std::cout << std::endl;
     }
 
 private:
@@ -733,6 +735,25 @@ private:
     }
 
 };// end class List
+
+
+template <typename NODETYPE>
+std::ostream& operator<<(std::ostream&         out,
+                         const List<NODETYPE>& a_list)
+{
+    std::copy(a_list.cbegin(), a_list.cend(),
+              std::ostream_iterator<NODETYPE>(out, " "));
+    return out;
+}
+
+template <>
+std::ostream& operator<<(std::ostream&     out,
+                         const List<char>& a_list)
+{
+    std::copy(a_list.cbegin(), a_list.cend(),
+              std::ostream_iterator<char>(out, ""));
+    return out;
+}
 
 
 #endif

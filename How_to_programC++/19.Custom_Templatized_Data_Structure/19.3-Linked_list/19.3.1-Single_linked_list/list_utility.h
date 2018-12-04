@@ -19,8 +19,8 @@ void concatenate(List<NODETYPE>& a_firstList, const List<NODETYPE>& a_secondList
     // deep copy second list
     const ListNode<NODETYPE>* currentNode = a_secondList.firstNode();
     while (currentNode != nullptr) {
-	a_firstList.insertBack(currentNode->getData());
-	currentNode = currentNode->nextNode();
+        a_firstList.insertBack(currentNode->getData());
+        currentNode = currentNode->nextNode();
     }
 }
 
@@ -58,11 +58,11 @@ void merge(List<NODETYPE>& a_firstList, List<NODETYPE>& a_secondList)
     {
         // inspect next node value with mergable node value
         while ( (currentNextNode != nullptr) && 
-    	    (currentNextNode->getData() < mergeCurrentNode->getData()) )
+                (currentNextNode->getData() < mergeCurrentNode->getData()) )
         {
-	   currentNode = currentNextNode;
-    	   // inspect next node data
-    	   currentNextNode = currentNextNode->nextNode();
+            currentNode = currentNextNode;
+            // inspect next node data
+            currentNextNode = currentNextNode->nextNode();
         }
 
         // current node and next mergable node before merge

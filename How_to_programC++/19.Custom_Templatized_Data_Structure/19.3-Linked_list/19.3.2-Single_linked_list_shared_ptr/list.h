@@ -768,6 +768,7 @@ public:
      * Usage: tmpList.reverse();
      * ------------------------
      * Method reverse list order.
+     * TODO: reimplement for better performance (look 19.3.1-Single_linked_list)
      *
      */
 
