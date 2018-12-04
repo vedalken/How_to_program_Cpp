@@ -13,18 +13,18 @@ class ListNode
     friend class List<NODETYPE>;
 public:
     explicit ListNode(const NODETYPE& a_data)
-	: m_data(a_data),
-	  m_nextNode(nullptr)
+        : m_data(a_data),
+          m_nextNode(nullptr)
     {
     }
 
     const NODETYPE& getData() const
     {
-	return m_data;
+        return m_data;
     }
 private:
     NODETYPE            m_data;
-    ListNode<NODETYPE>* m_nextNode;    
+    ListNode<NODETYPE>* m_nextNode;
 };
 
 
