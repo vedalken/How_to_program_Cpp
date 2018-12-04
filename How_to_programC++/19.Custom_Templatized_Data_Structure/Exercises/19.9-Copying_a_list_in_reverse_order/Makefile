@@ -2,7 +2,7 @@ SRC_TOP := ../../..
 
 include $(SRC_TOP)/rules/Makefile.inc
 
-LINKED_LIST := ../../19.3-Linked_list/19.3.2-Single_linked_list_shared_ptr
+LINKED_LIST := ../../19.3-Linked_list/19.3.1-Single_linked_list
 
 CFLAGS := $(CFLAGS) -I$(LINKED_LIST)
 

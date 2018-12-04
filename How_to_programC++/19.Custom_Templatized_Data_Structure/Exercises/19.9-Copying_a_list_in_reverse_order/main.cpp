@@ -9,15 +9,15 @@ int main(int argc, char* argv[])
     size_t N = 10;
     switch (argc)
     {
-	case 2:
-	    N = std::strtoul(argv[1], NULL, 0);
-	    break;
-	case 1:
-	    break;
-	default:
-	    std::cout << "Usage:\n";
-	    std::cout << "\t" << argv[0] << " [numbers]" << std::endl;
-	    return 1;
+        case 2:
+            N = std::strtoul(argv[1], NULL, 0);
+            break;
+        case 1:
+            break;
+        default:
+            std::cout << "Usage:\n";
+            std::cout << "\t" << argv[0] << " [numbers]" << std::endl;
+            return 1;
     }
 
     std::random_device r;
@@ -28,10 +28,10 @@ int main(int argc, char* argv[])
     for (size_t i = 0; i < N; ++i) {
         list.insertBack(uniform_dist(engine));
     }
-   
+
     std::cout << "original: " << list << std::endl;
 
-    // reverse list    
+    // reverse list
     list.reverse();
 
     std::cout << "reverse:  " << list << std::endl;

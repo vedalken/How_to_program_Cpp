@@ -22,27 +22,24 @@
 
 int main(int argc, char* argv[])
 {
-    size_t length = 25;
+    size_t length = 0;
     long int min_gen_num = 0;
     long int max_gen_num = 100;
 
     switch (argc) {
-	case 4:
-	    max_gen_num = std::strtol(argv[3], NULL, 0);
-	    [[fallthrough]]; // allow fall to next case
-	case 3: 
-	    min_gen_num = std::strtol(argv[2], NULL, 0);
-	    [[fallthrough]]; // allow fall to next case
-	case 2:
-	    length = std::strtoul(argv[1], NULL, 0);
-	    break;
-	case 1:
-	    // nothing to do
-	    break;
-	default:
-	    std::cout << "Usage:\n";
-	    std::cout << "\t" << argv[0] << " [length] [min_num] [max_num]\n\n";
-	    return 1;
+    case 4:
+        max_gen_num = std::strtol(argv[3], NULL, 0);
+        [[fallthrough]]; // allow fall to next case
+    case 3: 
+        min_gen_num = std::strtol(argv[2], NULL, 0);
+        [[fallthrough]]; // allow fall to next case
+    case 2:
+        length = std::strtoul(argv[1], NULL, 0);
+        break;
+    default:
+        std::cout << "Usage:\n";
+        std::cout << argv[0] << " [length] [min_num] [max_num]\n";
+        return 1;
     }
 
     std::default_random_engine engine(static_cast<unsigned int>(std::time(0)));
@@ -50,7 +47,7 @@ int main(int argc, char* argv[])
 
     List<int> list1;
     for (size_t i = 0; i < length; ++i) {
-	list1.insert(randomInt(engine));
+        list1.insertBack(randomInt(engine));
     }
 
     long int sum = std::accumulate(list1.cbegin(),
