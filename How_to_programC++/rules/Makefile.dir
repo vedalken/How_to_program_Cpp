@@ -3,7 +3,7 @@ MAKEFILE_DIR := 1
 
 # build all subdirectories (default)
 ifeq ($(SUBDIRS),)
-SUBDIRS = $(shell find . ! -path . -type d)
+SUBDIRS = $(shell find . -maxdepth 1 ! -path . -type d)
 endif
 
 CLEANDIRS = $(SUBDIRS:%=clean-%)
