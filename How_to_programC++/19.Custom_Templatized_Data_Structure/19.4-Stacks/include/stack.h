@@ -10,23 +10,23 @@ public:
     // implement stack push method (insert on top of stack)
     void push(const STACKTYPE& a_data)
     {
-	this->insertFront(a_data);
+        this->insertFront(a_data);
     }
 
     // implement stack pop method (remove top of stack)
     bool pop(STACKTYPE& a_data)
     {
-	return this->removeFront(&a_data);	
+        return this->removeFront(&a_data);	
     }
 
     bool isStackEmpty() const
     {
-	return this->isEmpty();	
+        return this->isEmpty();	
     }
 
     void printStack() const
     {
-	this->print();	
+        this->print();	
     }
 };
 
