@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.1)
-project(19.5)
+project(19.6.1)
 
 include_directories(include)
 
