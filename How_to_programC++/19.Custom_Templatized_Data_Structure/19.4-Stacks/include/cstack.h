@@ -11,22 +11,22 @@ class CStack
 public:
     void push(const STACKTYPE& a_data)
     {
-	m_stackList.insertFront(a_data);
+        m_stackList.insertFront(a_data);
     }
 
     bool pop(STACKTYPE& a_data)
     {
-	return m_stackList.removeFront(&a_data);
+        return m_stackList.removeFront(&a_data);
     }
 
     bool isStackEmpty() const
     {
-	return m_stackList.isEmpty();	
+        return m_stackList.isEmpty();   
     }
 
     void printStack() const
     {
-	m_stackList.print();
+        m_stackList.print();
     }
 
 private:
