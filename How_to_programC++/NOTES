@@ -1,0 +1,4 @@
+Add some small support with cmake only for fun :)
+
+TODO
+* auto-dependency generation for makefile(s)
