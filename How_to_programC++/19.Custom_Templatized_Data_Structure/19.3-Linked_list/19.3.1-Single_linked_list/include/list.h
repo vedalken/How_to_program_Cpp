@@ -14,25 +14,14 @@
 
 
 template <typename NODETYPE> class List;
-
 template <typename NODETYPE>
-std::ostream& operator<<(std::ostream&, const List<NODETYPE>&);
+extern std::ostream& operator<<(std::ostream&, const List<NODETYPE>&);
 
 
 template <typename NODETYPE>
 class List
 {
     using Compare = std::function<bool(const NODETYPE& lhs, const NODETYPE& rhs)>;
-
-    /*
-     * Friend function: operator<<
-     * Usage: List<int> tmpList{1, 2, 3};
-     *        std::cout << tmpList;
-     * ----------------------------------
-     * Method calls output stream operator `<<' to output list contents.
-     */
-    friend std::ostream& operator<<<NODETYPE>(std::ostream&         out,
-                                              const List<NODETYPE>& a_list);
 
 public:
 
@@ -735,25 +724,6 @@ private:
     }
 
 };// end class List
-
-
-template <typename NODETYPE>
-std::ostream& operator<<(std::ostream&         out,
-                         const List<NODETYPE>& a_list)
-{
-    std::copy(a_list.cbegin(), a_list.cend(),
-              std::ostream_iterator<NODETYPE>(out, " "));
-    return out;
-}
-
-template <>
-std::ostream& operator<<(std::ostream&     out,
-                         const List<char>& a_list)
-{
-    std::copy(a_list.cbegin(), a_list.cend(),
-              std::ostream_iterator<char>(out, ""));
-    return out;
-}
 
 
 #endif

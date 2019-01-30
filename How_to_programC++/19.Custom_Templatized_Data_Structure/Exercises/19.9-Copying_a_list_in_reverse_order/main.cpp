@@ -1,8 +1,8 @@
-#include "list.h"
 #include <random>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include "list.cpp"
 
 int main(int argc, char* argv[])
 {

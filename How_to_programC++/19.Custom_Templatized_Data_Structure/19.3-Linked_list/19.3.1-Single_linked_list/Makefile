@@ -4,6 +4,6 @@ include $(SRC_TOP)/rules/Makefile.inc
 
 CFLAGS := $(CFLAGS) -Iinclude
 DEPS = include/list.h
-OBJ = src/main.o
+OBJ = $(patsubst %.cpp,%.o,$(wildcard src/*.cpp))
 
 include $(SRC_TOP)/rules/Makefile.rules

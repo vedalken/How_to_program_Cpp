@@ -14,11 +14,11 @@
  *
  */
 
-#include "list.h"
 #include <functional>
 #include <random>
 #include <ctime>
 #include <algorithm>
+#include "list.cpp"
 
 int main(int argc, char* argv[])
 {
