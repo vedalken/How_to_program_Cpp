@@ -3,14 +3,11 @@ MAKEFILE_DIR := 1
 
 # build all subdirectories (default)
 ifeq ($(SUBDIRS),)
-SUBDIRS = $(shell find . -maxdepth 1 ! -path . -type d)
+SUBDIRS := $(shell find . -maxdepth 1 ! -path . -type d)
 endif
 
-CLEANDIRS = $(SUBDIRS:%=clean-%)
-BUILDIRS = $(SUBDIRS:%=build-%)
-
-.PHONY: all
-all: subdirs
+CLEANDIRS := $(SUBDIRS:%=clean-%)
+BUILDIRS := $(SUBDIRS:%=build-%)
 
 .PHONY: subdirs $(BUILDIRS)
 subdirs: $(BUILDIRS)
@@ -18,7 +15,7 @@ $(BUILDIRS): build-% : %
 	$(MAKE) -C $<
 
 .PHONY: clean $(CLEANDIRS)
-clean: $(CLEANDIRS)
+clean:: $(CLEANDIRS)
 $(CLEANDIRS): clean-% : %
 	$(MAKE) -C $< clean
 
