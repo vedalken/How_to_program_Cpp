@@ -533,6 +533,19 @@ public:
     }
 
     /*
+     * Function: removeFront
+     * Usage: tmpList.removeFront();
+     * -------------------------------------
+     * Method removes first node.
+     */
+
+    bool removeFront()
+    {
+        NODETYPE dummy;
+        return removeFront(&dummy);
+    }
+
+    /*
      * Function: removeBack
      * Usage: int a; tmpList.removeBack(&a);
      * -------------------------------------
@@ -576,6 +589,18 @@ public:
         oldLastNode = nullptr;
 
         return true;
+    }
+
+    /*
+     * Function: removeBack
+     * Usage: tmpList.removeBack();
+     * -------------------------------------
+     */
+
+    bool removeBack()
+    {
+        NODETYPE dummy;
+        return removeBack(&dummy);
     }
 
     /*
@@ -672,7 +697,7 @@ public:
      * Function: print
      * Usage: tmpList.print();
      * -----------------------
-     * Method displays all list nodes.
+     * Method displays all list nodes (see extraction operator).
      */
 
     void print() const
