@@ -19,9 +19,19 @@ public:
         return m_stackList.removeFront(&a_data);
     }
 
-    bool isStackEmpty() const
+    bool pop()
+    {
+        return m_stackList.removeFront();
+    }
+
+    bool isEmpty() const
     {
         return m_stackList.isEmpty();   
+    }
+
+    const STACKTYPE& top() const
+    {
+        return m_stackList.firstNode->getData();
     }
 
     void printStack() const

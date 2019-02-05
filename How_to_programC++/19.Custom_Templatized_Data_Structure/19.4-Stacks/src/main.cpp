@@ -16,7 +16,7 @@ int main()
     std::cout << "Removing integer stack..." << std::endl;
 
     int popInteger;
-    while ( !intStack.isStackEmpty() ) {
+    while ( !intStack.isEmpty() ) {
         intStack.pop(popInteger);
         std::cout << popInteger << " popped from stack" << std::endl;
         intStack.printStack();
@@ -31,7 +31,7 @@ int main()
     }
 
     double popDouble;
-    while ( !doubleStack.isStackEmpty() ) {
+    while ( !doubleStack.isEmpty() ) {
         doubleStack.pop(popDouble);
         std::cout << popDouble << " popped from stack" << std::endl;
         doubleStack.printStack();

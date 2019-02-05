@@ -19,9 +19,19 @@ public:
         return this->removeFront(&a_data);	
     }
 
-    bool isStackEmpty() const
+    bool pop()
     {
-        return this->isEmpty();	
+        return this->removeFront();
+    }
+
+    bool isEmpty() const
+    {
+        return List<STACKTYPE>::isEmpty();
+    }
+
+    const STACKTYPE& top() const
+    {
+        return this->firstNode()->getData();
     }
 
     void printStack() const
