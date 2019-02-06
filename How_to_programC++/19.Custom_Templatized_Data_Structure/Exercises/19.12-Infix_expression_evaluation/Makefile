@@ -14,4 +14,7 @@ LFLAGS_INC = -I$(LINKED_LIST_DIR)/src
 DEPS = include/infix_expr.h
 OBJ = $(patsubst %.cpp,%.o,$(wildcard src/*))
 
+# add math library
+LFLAGS += -lm
+
 include $(SRC_TOP)/rules/Makefile.rules

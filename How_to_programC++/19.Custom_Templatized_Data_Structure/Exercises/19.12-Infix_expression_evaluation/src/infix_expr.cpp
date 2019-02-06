@@ -118,9 +118,12 @@ void InfixExpr::convertToPostfix()
         }
         else if (isOperator(infix))
         {
-            // compare infix operator and stack operator precedence
-            bool prec = precedence(m_stack.top(), infix);
-            if (prec) {
+            while (!m_stack.isEmpty())
+            {
+                // compare infix operator and stack operator precedence
+                if (!precedence(m_stack.top(), infix))
+                    break;
+
                 char op;
                 m_stack.pop(op);
                 m_postfix.push_back(op);
