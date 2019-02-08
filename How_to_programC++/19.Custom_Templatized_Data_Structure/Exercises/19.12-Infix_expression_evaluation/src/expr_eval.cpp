@@ -43,10 +43,19 @@ int ExprEval::evaluatePostfix()
     }
 
     // read postfix expression
-    for (char c : postfix)
+    for (auto it = postfix.cbegin(); it != postfix.cend(); ++it)
     {
-        if (isdigit(c)) {
-            m_intStack.push(c - '0');
+        if (isdigit(*it))
+        {
+            std::string number;
+            while (*it != InfixExpr::c_postfixNumDelim)
+            {
+                number.push_back(*it);
+                ++it;
+            }
+            // discard postfix number delimiter
+
+            m_intStack.push(std::stoi(number));
         }
         else {
             // extract two elements
@@ -54,7 +63,7 @@ int ExprEval::evaluatePostfix()
             m_intStack.pop(x);
             m_intStack.pop(y);
             // calculate: `y op x`
-            int result = calculate(y, x, c);
+            int result = calculate(y, x, *it);
             m_intStack.push(result);
         }
     }

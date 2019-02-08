@@ -11,8 +11,9 @@
 
 class InfixExpr
 {
-    static const std::map<char, int> c_operatorPrecedence;
 public:
+    static const char c_postfixNumDelim;
+
     InfixExpr();
     InfixExpr(const char* a_infix);
     const InfixExpr& operator=(const char* a_infix);
@@ -25,6 +26,8 @@ public:
     void convertToPostfix();
 
 private:
+    static const std::map<char, int> c_operatorPrecedence;
+
     bool isOperator(char op) const;
     bool precedence(char op1, char op2) const;
 

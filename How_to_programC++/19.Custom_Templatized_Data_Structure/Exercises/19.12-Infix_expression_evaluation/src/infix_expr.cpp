@@ -8,6 +8,10 @@ const std::map<char, int> InfixExpr::c_operatorPrecedence = {
      {'+', 90},  {'-', 90},  {'*', 100},
      {'/', 100}, {'^', 100}, {'%', 100}};
 
+/* More than one digit number pose issue to separate operator operands. For this */
+/* purpose is added posfix number delimiter. */
+const char InfixExpr::c_postfixNumDelim = ' ';
+
 /*
  * Constructor: InfixExpr
  * ---------------------
@@ -104,24 +108,33 @@ void InfixExpr::convertToPostfix()
     // append right parenthesis to the end
     m_infix.push_back(')');
 
-    for (char infix : m_infix)
+    for (auto it = m_infix.cbegin(); it != m_infix.cend(); ++it)
     {
         if (m_stack.isEmpty()) {
             return;
         }
 
-        if (isdigit(infix)) {
-            m_postfix.push_back(infix);
+        if (isdigit(*it))
+        {
+            // extract all digits and add postfix number delimiter
+            while (isdigit(*it))
+            {
+                m_postfix.push_back(*it);
+                ++it;
+            }
+
+            it = std::prev(it);
+            m_postfix.push_back(c_postfixNumDelim);
         }
-        else if (infix == '(') {
-            m_stack.push(infix);
+        else if (*it == '(') {
+            m_stack.push(*it);
         }
-        else if (isOperator(infix))
+        else if (isOperator(*it))
         {
             while (!m_stack.isEmpty())
             {
                 // compare infix operator and stack operator precedence
-                if (!precedence(m_stack.top(), infix))
+                if (!precedence(m_stack.top(), *it))
                     break;
 
                 char op;
@@ -130,9 +143,9 @@ void InfixExpr::convertToPostfix()
             }
 
             // lower operator precedence
-            m_stack.push(infix);
+            m_stack.push(*it);
         }
-        else if (infix == ')')
+        else if (*it == ')')
         {
             char op;
             while (m_stack.top() != '(') {
