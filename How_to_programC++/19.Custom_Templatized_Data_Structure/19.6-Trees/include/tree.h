@@ -17,6 +17,11 @@ public:
         deleteNodeHelper(&m_rootNode);
     }
 
+    void insertNode(NODETYPE&& a_data)
+    {
+        insertNodeHelper( &m_rootNode, std::move(a_data) );
+    }
+
     void insertNode(const NODETYPE& a_data)
     {
         insertNodeHelper( &m_rootNode, a_data );
@@ -61,6 +66,24 @@ private:
             }
             else {
                 insertNodeHelper( &((*a_ptr)->m_rightNode), a_data );
+            }
+        }
+    }
+
+    void insertNodeHelper(TreeNode<NODETYPE>** a_ptr,
+                          NODETYPE&&           a_data)
+    {
+        if (*a_ptr == nullptr) { // derefernce pptr == ptr
+            // Empty tree node.
+            *a_ptr = new TreeNode<NODETYPE>(a_data);
+        }
+        else {
+            // allow duplicate insertion
+            if (a_data <= (*a_ptr)->m_data) {
+                insertNodeHelper( &((*a_ptr)->m_leftNode), std::move(a_data) );
+            }
+            else {
+                insertNodeHelper( &((*a_ptr)->m_rightNode), std::move(a_data) );
             }
         }
     }
