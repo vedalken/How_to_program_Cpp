@@ -12,16 +12,27 @@ class TreeNode
     friend class Tree<NODETYPE>;
 public:
     TreeNode(const NODETYPE& a_data)
-	: m_leftNode(nullptr),
-	  m_data(a_data),
-	  m_rightNode(nullptr)
+        : m_leftNode(nullptr),
+          m_data(a_data),
+          m_rightNode(nullptr)
     {
     }
 
     const NODETYPE& getData() const
     {
-	return m_data;
+        return m_data;
     }
+
+    const TreeNode<NODETYPE>* getLeftNode() const
+    {
+        return m_leftNode;
+    }
+
+    const TreeNode<NODETYPE>* getRightNode() const
+    {
+        return m_rightNode;
+    }
+
 private:
     TreeNode<NODETYPE>* m_leftNode;
     NODETYPE            m_data;

@@ -17,6 +17,11 @@ public:
         deleteNodeHelper(&m_rootNode);
     }
 
+    const TreeNode<NODETYPE>* getRootNode() const
+    {
+        return m_rootNode;
+    }
+
     void insertNode(NODETYPE&& a_data)
     {
         insertNodeHelper( &m_rootNode, std::move(a_data) );

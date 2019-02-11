@@ -9,9 +9,9 @@ int main()
 
     for (int i = 0; i < 10; ++i)
     {
-	int value = 0;
-	std::cin >> value;
-	intTree.insertNode(value);
+        int value = 0;
+        std::cin >> value;
+        intTree.insertNode(value);
     }
 
     std::cout << "\nPreorder traversal:\n";
