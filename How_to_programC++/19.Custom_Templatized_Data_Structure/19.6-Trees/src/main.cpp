@@ -1,20 +1,17 @@
 #include <iostream>
+#include <vector>
 #include "tree.h"
 
 int main()
 {
     Tree<int> intTree;
 
-    std::cout << "Enter 10 integer values:\n";
-
-    for (int i = 0; i < 10; ++i)
-    {
-        int value = 0;
-        std::cin >> value;
-        intTree.insertNode(value);
+    std::vector<int> v = {50, 75, 25, 33, 12, 88, 67, 31, 6, 13, 16};
+    for (auto i : v) {
+        intTree.insertNode(i);
     }
 
-    std::cout << "\nPreorder traversal:\n";
+    std::cout << "Preorder traversal:\n";
     intTree.preOrderTraversal();
 
     std::cout << "\nInorder traversal:\n";
@@ -23,6 +20,13 @@ int main()
     std::cout << "\nPostorder traversal:\n";
     intTree.postOrderTraversal();
     std::cout << std::endl;
+
+    if (intTree.remove(50)) {
+        std::cout << "Found match to remove" << std::endl; 
+    }
+
+    std::cout << "Inorder traversal:\n";
+    intTree.inOrderTraversal();
 
     return 0;
 }
