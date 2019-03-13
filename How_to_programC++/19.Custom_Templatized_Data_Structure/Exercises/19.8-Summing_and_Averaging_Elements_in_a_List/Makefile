@@ -8,6 +8,6 @@ LINKED_LIST_INC = $(LINKED_LIST)/include
 
 CFLAGS := $(CFLAGS) -I$(LINKED_LIST_INC) -I$(LINKED_LIST_SRC)
 DEPS := $(LINKED_LIST_INC)/list.h $(LINKED_LIST_SRC)/list.cpp
-OBJ := main.o
+OBJ := src/main.o
 
 include $(SRC_TOP)/rules/Makefile.rules

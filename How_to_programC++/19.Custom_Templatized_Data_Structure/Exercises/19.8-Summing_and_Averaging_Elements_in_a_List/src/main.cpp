@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     }
 
     std::default_random_engine engine(static_cast<unsigned int>(std::time(0)));
-    std::uniform_int_distribution randomInt(min_gen_num, max_gen_num);
+    std::uniform_int_distribution<> randomInt(min_gen_num, max_gen_num);
 
     List<int> list1;
     for (size_t i = 0; i < length; ++i) {
