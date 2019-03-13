@@ -3,7 +3,7 @@
 
 int main()
 {
-    InfixExpr e = "(60+21)*12 - 80512/40";
+    InfixExpr e("(60+21)*12 - 80512/40");
     ExprEval exprEval(e);
 
     // evaluate postfix expression    
