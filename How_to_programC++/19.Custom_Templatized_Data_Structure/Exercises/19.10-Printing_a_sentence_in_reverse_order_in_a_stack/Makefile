@@ -2,6 +2,6 @@ SRC_TOP := ../../..
 
 include $(SRC_TOP)/rules/Makefile.inc
 
-OBJ := main.o
+OBJ := src/main.o
 
 include $(SRC_TOP)/rules/Makefile.rules
