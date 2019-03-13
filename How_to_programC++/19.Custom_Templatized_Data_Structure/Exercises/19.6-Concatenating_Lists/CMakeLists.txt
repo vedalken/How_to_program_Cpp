@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.1)
-project(19.7e)
+project(19.6e)
 
 set(linked_list_path ../../19.3-Linked_list/19.3.1-Single_linked_list)
 
