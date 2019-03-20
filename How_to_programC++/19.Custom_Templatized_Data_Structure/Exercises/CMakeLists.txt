@@ -12,6 +12,8 @@ set(SUBDIRS
     19.19-Depth_of_binary_tree
     19.20-Recursively_print_a_list_backward
     19.21-Recursively_search_a_list
+    19.24-Level-order_traversal
+    19.25-Printing_tree
 )
 
 foreach(subdir ${SUBDIRS})
