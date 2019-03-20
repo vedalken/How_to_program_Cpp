@@ -2,6 +2,7 @@
 #define TREE_H
 
 #include <iostream>
+#include <iomanip>
 #include <functional>
 #include "tree_node.h"
 #include "queue.h"
@@ -53,6 +54,25 @@ public:
     {
         postOrderHelper(m_rootNode);
     }
+
+    /*
+     * Function: outputTree
+     * --------------------
+     * Display binary tree.
+     * The largest value is at top right the smallest is at bottom 
+     * right, and on the left side at the beginning is the root node.
+     */
+
+    void outputTree(size_t a_width) const
+    {
+        outputTree(m_rootNode, a_width, 0);
+    }
+
+    /*
+     * Function: empty
+     * ---------------
+     * Function check if binary tree is empty.
+     */
 
     bool empty() const
     {
@@ -531,6 +551,26 @@ protected:
             std::cout << a_ptr->m_data << ' ';
         }
     }
+
+    /*
+     * Function: outputTree
+     * --------------------
+     * Helper function to vertically display tree.
+     */
+
+    void outputTree(const TreeNodePtr a_ptr, size_t a_width,
+                    size_t a_totalWidth = 0) const
+    {
+        if (a_ptr != nullptr)
+        {
+            size_t totalWidth = a_totalWidth + a_width;
+
+            outputTree(a_ptr->m_rightNode, a_width, totalWidth);
+            std::cout << std::setw(totalWidth) << std::right << a_ptr->m_data << '\n';
+            outputTree(a_ptr->m_leftNode, a_width, totalWidth);
+        }
+    }
+
 };
 
 #endif

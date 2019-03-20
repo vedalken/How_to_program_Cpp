@@ -23,9 +23,5 @@ int main()
     std::cout << "\nInorder traversal:\n";
     intTree.inOrderTraversal();
 
-    std::cout << "\nLevel order traversal:\n";
-    intTree.levelOrderTraversal();
-    std::cout << std::endl;
-
     return 0;
 }
