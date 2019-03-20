@@ -1,4 +1,8 @@
 Add some small support with cmake only for fun :)
+Due to my laziness I might somewhere omit makefile while
+somewhere cmake.
 
 TODO
 * auto-dependency generation for makefile(s)
+* replace `make` with `cmake`
+* add cmake/make support for older sections
