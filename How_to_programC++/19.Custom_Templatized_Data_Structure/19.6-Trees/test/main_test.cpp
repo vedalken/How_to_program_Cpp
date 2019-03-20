@@ -1,9 +1,65 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <vector>
+#include <algorithm>
 #include <doctest/doctest.h>
 #include "test_tree.h"
 
-TEST_CASE("test remove")
+/*
+ * Test case: find
+ * ---------------
+ * Test find tree node.
+ */
+
+TEST_CASE("find")
+{
+    TestTree<int> intTree;
+
+    std::vector<int> v = {50, 75, 25, 33, 12, 88, 31, 6};
+    for (auto i : v)
+        intTree.insertNode(i);
+
+    SUBCASE("all existing value")
+    {
+        // check all values
+        for (auto val : v)
+            CHECK(intTree.find(val) != nullptr);
+    }
+
+    SUBCASE("non-existing value")
+    {
+        CHECK(intTree.find(123456789) == nullptr);
+    }
+
+    SUBCASE("minimum value")
+    {
+        REQUIRE(intTree.getRootNode() != nullptr);
+
+        const int minValue = *std::min_element(v.cbegin(), v.cend());
+        const TreeNode<int>* minNode = intTree.findMinNode(intTree.getRootNode());
+
+        REQUIRE(minNode != nullptr);
+        CHECK(minNode->getData() == minValue);
+    }
+
+    SUBCASE("maximal value")
+    {
+        REQUIRE(intTree.getRootNode() != nullptr);
+
+        const int maxValue = *std::max_element(v.cbegin(), v.cend());
+        const TreeNode<int>* maxNode = intTree.findMaxNode(intTree.getRootNode());
+
+        REQUIRE(maxNode != nullptr);
+        CHECK(maxNode->getData() == maxValue);
+    }
+}
+
+/*
+ * Test case: remove
+ * -----------------
+ * Test remove tree node.
+ */
+
+TEST_CASE("remove")
 {
     
     TestTree<int> intTree;
@@ -14,7 +70,7 @@ TEST_CASE("test remove")
 
     SUBCASE("the smallest node")
     {
-        const int minVal(6);
+        const int minVal = *std::min_element(v.cbegin(), v.cend());
 
         // remove last element
         CHECK(intTree.remove(minVal) == true);
@@ -81,9 +137,8 @@ TEST_CASE("test remove")
 
     SUBCASE("with replacement node with one child")
     {
-        // node to remove
-        const int removeVal = 25;
-        const int replaceVal = 16;
+        const int removeVal = 25;  // node to remove
+        const int replaceVal = 16; // node to replace with
         const int val = 15;
 
         REQUIRE(intTree.find(val) == nullptr);

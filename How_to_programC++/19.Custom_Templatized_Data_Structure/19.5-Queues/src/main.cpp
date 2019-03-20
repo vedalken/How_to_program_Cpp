@@ -8,15 +8,15 @@ int main()
     std::cout << "processing and integer Queue" << std::endl;
 
     for (int i = 0; i < 3; ++i) {
-	intQueue.enqueue(i);
-	intQueue.printQueue();
+        intQueue.enqueue(i);
+        intQueue.print();
     }
 
     int dequeueInteger;
-    while ( !intQueue.isQueueEmpty() ) {
+    while ( !intQueue.empty() ) {
         intQueue.dequeue(dequeueInteger);
         std::cout << dequeueInteger << " dequeue integer" << std::endl;
-        intQueue.printQueue();
+        intQueue.print();
     }
 
     Queue<double> doubleQueue;
@@ -24,14 +24,14 @@ int main()
 
     for (int i = 0; i < 3; ++i) {
         doubleQueue.enqueue(i * 1.1);
-        doubleQueue.printQueue();
+        doubleQueue.print();
     }
 
     double dequeueDouble;
-    while ( !doubleQueue.isQueueEmpty() ) {
+    while ( !doubleQueue.empty() ) {
         doubleQueue.dequeue(dequeueDouble);
         std::cout << dequeueDouble << " dequeue double" << std::endl;
-        doubleQueue.printQueue();
+        doubleQueue.print();
     }
 
     return 0;    

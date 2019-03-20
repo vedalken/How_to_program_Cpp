@@ -10,25 +10,25 @@ public:
     // implement push on top (or enqueue)
     void enqueue(const QUEUE_TYPE& a_data)
     {
-	this->insertBack(a_data);
+        this->insertBack(a_data);
     }
 
     // implement pop in front (or dequeue)
     bool dequeue(QUEUE_TYPE& a_data)
     {
-	return this->removeFront(&a_data);
+        return this->removeFront(&a_data);
     }
 
-    bool isQueueEmpty() const
+    bool empty() const
     {
-	// resolve non-dependent name to dependent name
-	return this->isEmpty();
+        // resolve non-dependent name to dependent name
+        return this->isEmpty();
     }
 
-    void printQueue() const
+    void print() const
     {
-	// resolve non-dependent name to dependent name
-	this->print();
+        // resolve non-dependent name to dependent name
+        List<QUEUE_TYPE>::print();
     }
 };
 

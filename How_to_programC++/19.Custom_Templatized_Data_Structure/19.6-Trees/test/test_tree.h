@@ -26,22 +26,42 @@ public:
         return findParentNode(Tree<NODETYPE>::getRootNode(), a_data);
     }
 
-    TreeNode<NODETYPE>* findParentNode(TreeNode<NODETYPE>* a_ptr,
-                                       const NODETYPE&     a_data)
+    TreeNode<NODETYPE>*
+    findParentNode(TreeNode<NODETYPE>* a_ptr, const NODETYPE& a_data)
     {
         return Tree<NODETYPE>::findParentNode(a_ptr, a_data);
     }
 
-    TreeNode<NODETYPE>* findNodeHelper(TreeNode<NODETYPE>* a_ptr,
-                                       const NODETYPE&     a_data)
+    TreeNode<NODETYPE>*
+    findNodeHelper(TreeNode<NODETYPE>* a_ptr, const NODETYPE& a_data)
     {
         return Tree<NODETYPE>::findNodeHelper(a_ptr, a_data);
     }
 
-    const TreeNode<NODETYPE>* findNodeHelper(const TreeNode<NODETYPE>* a_ptr,
-                                             const NODETYPE&           a_data)
+    const TreeNode<NODETYPE>*
+    findNodeHelper(const TreeNode<NODETYPE>* a_ptr, const NODETYPE& a_data)
     {
         return Tree<NODETYPE>::findNodeHelper(a_ptr, a_data);
+    }
+
+    TreeNode<NODETYPE>* findMinNode(TreeNode<NODETYPE>* a_ptr) const
+    {
+        return Tree<NODETYPE>::findMinNode(a_ptr);
+    }
+
+    const TreeNode<NODETYPE>* findMinNode(const TreeNode<NODETYPE>* a_ptr) const
+    {
+        return Tree<NODETYPE>::findMinNode(a_ptr);
+    }
+
+    TreeNode<NODETYPE>* findMaxNode(TreeNode<NODETYPE>* a_ptr) const
+    {
+        return Tree<NODETYPE>::findMaxNode(a_ptr);
+    }
+
+    const TreeNode<NODETYPE>* findMaxNode(const TreeNode<NODETYPE>* a_ptr) const
+    {
+        return Tree<NODETYPE>::findMaxNode(a_ptr);
     }
 
 };

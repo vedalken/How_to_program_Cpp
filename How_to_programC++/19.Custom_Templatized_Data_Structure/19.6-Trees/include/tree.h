@@ -4,12 +4,15 @@
 #include <iostream>
 #include <functional>
 #include "tree_node.h"
+#include "queue.h"
 
 template <typename NODETYPE>
 class Tree
 {
 private:
-    TreeNode<NODETYPE>* m_rootNode;
+    using TreeNodePtr = TreeNode<NODETYPE>*;
+
+    TreeNodePtr m_rootNode;
 
 public:
     Tree() : m_rootNode(nullptr)
@@ -51,6 +54,39 @@ public:
         postOrderHelper(m_rootNode);
     }
 
+    bool empty() const
+    {
+        return (m_rootNode == nullptr);
+    }
+
+    /*
+     * Function: levelOrderTraversal
+     * -----------------------------
+     * Non-recursive function display level order tree nodes.
+     */
+
+    void levelOrderTraversal() const
+    {
+        if (empty())
+            return;
+
+        Queue<TreeNodePtr> q;
+        q.enqueue(m_rootNode);
+
+        TreeNodePtr tmpNode;
+        while (!q.empty())
+        {
+            q.dequeue(tmpNode);
+            std::cout << tmpNode->getData() << ' ';
+
+            if (tmpNode->m_leftNode != nullptr)
+                q.enqueue(tmpNode->m_leftNode);
+
+            if (tmpNode->m_rightNode != nullptr)
+                q.enqueue(tmpNode->m_rightNode);
+        }
+    }
+
     /* 
      * Function: removeNode
      * --------------------
@@ -60,8 +96,8 @@ public:
 
     bool remove(const NODETYPE& a_data)
     {
-        TreeNode<NODETYPE>* parentRemoveNode = findParentNode(a_data);
-        TreeNode<NODETYPE>* removeNode = findNodeHelper(parentRemoveNode, a_data);
+        TreeNodePtr parentRemoveNode = findParentNode(a_data);
+        TreeNodePtr removeNode = findNodeHelper(parentRemoveNode, a_data);
 
         // without match
         if (removeNode == nullptr)
@@ -70,15 +106,15 @@ public:
         // node to remove without children
         if (isLeafNode(removeNode))
         {
-            TreeNode<NODETYPE>* tmpRemoveNode = removeNode;
+            TreeNodePtr tmpRemoveNode = removeNode;
             deleteNodeHelper(&tmpRemoveNode);
             _setChildNode(parentRemoveNode, removeNode, nullptr);
 
             return true;
         }
 
-        TreeNode<NODETYPE>* tmpRemoveNode = removeNode;
-        TreeNode<NODETYPE>* replaceNode = nullptr;
+        TreeNodePtr tmpRemoveNode = removeNode;
+        TreeNodePtr replaceNode = nullptr;
 
         // node to remove with only one child
         if (removeNode->m_leftNode && isLeafNode(removeNode->m_leftNode))
@@ -103,7 +139,7 @@ public:
             /* find replacement node for node to be removed. First find the largest
              * node of the left child, otherwise find smallest node of the right child.
              */
-            TreeNode<NODETYPE>* parentReplaceNode;
+            TreeNodePtr parentReplaceNode;
             parentReplaceNode = findMaxParentNode(removeNode->m_leftNode);
             replaceNode = findMaxNode(parentReplaceNode);
 
@@ -117,8 +153,8 @@ public:
                     return false;
             }
 
-            TreeNode<NODETYPE>* tmpReplaceNode = replaceNode;
-            TreeNode<NODETYPE>* childReplaceNode = nullptr;
+            TreeNodePtr tmpReplaceNode = replaceNode;
+            TreeNodePtr childReplaceNode = nullptr;
 
             // replace node has a child, that child must be a new child of 
             // the parent of the replace node
@@ -152,14 +188,14 @@ public:
      * Find tree node.
      */
 
-    TreeNode<NODETYPE>* find(const NODETYPE& a_data) const
+    TreeNodePtr find(const NODETYPE& a_data) const
     {
         return findNodeHelper(m_rootNode, a_data);
     }
 
 protected:
 
-    TreeNode<NODETYPE>* getRootNode()
+    TreeNodePtr getRootNode()
     {
         return m_rootNode;
     }
@@ -170,9 +206,8 @@ protected:
      * Helper function to set parent old child node with new child node.
      */
 
-    bool _setChildNode(TreeNode<NODETYPE>* a_parent,
-                       TreeNode<NODETYPE>* a_oldChild,
-                       TreeNode<NODETYPE>* a_newChild)
+    bool _setChildNode(TreeNodePtr a_parent, TreeNodePtr a_oldChild,
+                       TreeNodePtr a_newChild)
     {
         if (a_parent == nullptr) {
             return false;
@@ -205,7 +240,7 @@ protected:
      * Helper function to find parent node.
      */
 
-    TreeNode<NODETYPE>* findParentNode(const NODETYPE& a_data) const
+    TreeNodePtr findParentNode(const NODETYPE& a_data) const
     {
         return findParentNode(m_rootNode, a_data);
     }
@@ -219,8 +254,8 @@ protected:
      * of ** (pointer to pointer or shortly pptr).
      */
 
-    void insertNodeHelper(TreeNode<NODETYPE>** a_ptr,
-                          const NODETYPE&      a_data)
+    void insertNodeHelper(TreeNodePtr*    a_ptr,
+                          const NODETYPE& a_data)
     {
         if (*a_ptr == nullptr) { // derefernce pptr == ptr
             // Empty tree node.
@@ -237,8 +272,8 @@ protected:
         }
     }
 
-    void insertNodeHelper(TreeNode<NODETYPE>** a_ptr,
-                          NODETYPE&&           a_data)
+    void insertNodeHelper(TreeNodePtr* a_ptr,
+                          NODETYPE&&   a_data)
     {
         if (*a_ptr == nullptr) { // derefernce pptr == ptr
             // Empty tree node.
@@ -263,8 +298,13 @@ protected:
      * On success return node, otherwise nullptr.
      */
 
-    TreeNode<NODETYPE>* findParentNode(TreeNode<NODETYPE>* a_ptr,
-                                       const NODETYPE&     a_data) const
+    template<typename TREENODE>
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+      TREENODE*>::type
+    findParentNode(TREENODE* a_ptr, const NODETYPE& a_data) const
     {
         if (a_ptr == nullptr) {
             return nullptr;
@@ -297,28 +337,21 @@ protected:
         return a_ptr;
     }
 
-    TreeNode<NODETYPE>* findNodeHelper(TreeNode<NODETYPE>* a_ptr,
-                                       const NODETYPE&     a_data) const
-    {
-        return _findNodeHelper(a_ptr, a_data);
-    }
-
-    const TreeNode<NODETYPE>* findNodeHelper(const TreeNode<NODETYPE>* a_ptr,
-                                             const NODETYPE&           a_data) const
-    {
-        return _findNodeHelper(a_ptr, a_data);
-    }
-
     /*
      * Function: _findNodeHelper
      * ------------------------
-     * Function search for the tree node.
+     * Function search for the tree node. Function can handle const and non-const
+     * tree node pointer types (the ugly template form).
      *
      * On success return node, otherwise nullptr.
      */
 
     template<typename TREENODE>
-    TREENODE* _findNodeHelper(TREENODE* a_ptr, const NODETYPE& a_data) const
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+    TREENODE*>::type findNodeHelper(TREENODE* a_ptr, const NODETYPE& a_data) const
     {
         if (a_ptr == nullptr)
             return nullptr;
@@ -340,11 +373,16 @@ protected:
     /*
      * Function: findMinParentNode
      * ---------------------------
-     * Function find parent of the smallest node.
-     *
+     * Function find parent of the smallest node. Function can handle const
+     * and non-const tree node pointer types (the ugly template form).
      */
 
-    TreeNode<NODETYPE>* findMinParentNode(TreeNode<NODETYPE>* a_ptr) const
+    template<typename TREENODE>
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+    TREENODE*>::type findMinParentNode(TREENODE* a_ptr) const
     {
         if (a_ptr == nullptr) {
             return nullptr;
@@ -372,7 +410,12 @@ protected:
      * Function search for the smallest node.
      */
 
-    TreeNode<NODETYPE>* findMinNode(TreeNode<NODETYPE>* a_ptr) const
+    template<typename TREENODE>
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+    TREENODE*>::type findMinNode(TREENODE* a_ptr) const
     {
         TreeNode<NODETYPE>* node = findMinParentNode(a_ptr);
 
@@ -392,7 +435,12 @@ protected:
      * Function search parent for the largest node.
      */
 
-    TreeNode<NODETYPE>* findMaxParentNode(TreeNode<NODETYPE>* a_ptr) const
+    template<typename TREENODE>
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+    TREENODE*>::type findMaxParentNode(TREENODE* a_ptr) const
     {
         if (a_ptr == nullptr) {
             return nullptr;
@@ -421,7 +469,12 @@ protected:
      * Function search for the largest node.
      */
 
-    TreeNode<NODETYPE>* findMaxNode(TreeNode<NODETYPE>* a_ptr) const
+    template<typename TREENODE>
+    typename std::enable_if<
+      std::is_same<TreeNode<NODETYPE>,
+        typename std::remove_const<TREENODE>::type
+      >::value,
+    TREENODE*>::type findMaxNode(TREENODE* a_ptr) const
     {
         TreeNode<NODETYPE>* node = findMaxParentNode(a_ptr);
 
@@ -436,7 +489,7 @@ protected:
     }
 
     // Recursively delete nodes in postorder traversal of Tree
-    void deleteNodeHelper(TreeNode<NODETYPE>** a_ptr)
+    void deleteNodeHelper(TreeNodePtr* a_ptr)
     {
         if ((a_ptr != nullptr) && (*a_ptr != nullptr))
         {
@@ -450,7 +503,7 @@ protected:
     }
 
     // Preorder processing tree nodes without tree modifications
-    void preOrderHelper(TreeNode<NODETYPE>* a_ptr) const
+    void preOrderHelper(TreeNodePtr a_ptr) const
     {
         if (a_ptr != nullptr) {
             std::cout << a_ptr->m_data << ' ';
@@ -460,7 +513,7 @@ protected:
     }
 
     // Inorder processing tree nodes without tree modifications
-    void inOrderHelper(TreeNode<NODETYPE>* a_ptr) const
+    void inOrderHelper(TreeNodePtr a_ptr) const
     {
         if (a_ptr != nullptr) {
             inOrderHelper(a_ptr->m_leftNode);
@@ -470,7 +523,7 @@ protected:
     }
 
     // Postorder processing tree nodes without tree modifications
-    void postOrderHelper(TreeNode<NODETYPE>* a_ptr) const
+    void postOrderHelper(TreeNodePtr a_ptr) const
     {
         if (a_ptr != nullptr) {
             postOrderHelper(a_ptr->m_leftNode);

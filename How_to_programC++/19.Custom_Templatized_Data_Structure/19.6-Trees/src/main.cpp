@@ -19,14 +19,13 @@ int main()
     
     std::cout << "\nPostorder traversal:\n";
     intTree.postOrderTraversal();
-    std::cout << std::endl;
 
-    if (intTree.remove(50)) {
-        std::cout << "Found match to remove" << std::endl; 
-    }
-
-    std::cout << "Inorder traversal:\n";
+    std::cout << "\nInorder traversal:\n";
     intTree.inOrderTraversal();
+
+    std::cout << "\nLevel order traversal:\n";
+    intTree.levelOrderTraversal();
+    std::cout << std::endl;
 
     return 0;
 }
